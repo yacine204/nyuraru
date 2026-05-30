@@ -50,6 +50,7 @@ neural_network.train(40, 0.01, x_train, y_onehot, batch_size=128, shuffle=True)
 test_loss, test_accuracy = neural_network.evaluate(x_test, y_test_onehot)
 print(f"Test Cost: {test_loss:.4f}, Test Accuracy: {test_accuracy:.3f}")
 ```
-### Test results
-Based on running nyuraru_test.py and pytorch_test.py:
-- Nyuraru: Wall Time 7.39s, Test Cost 0.0769, Test Accuracy 0.97
+
+```bash
+Test Cost 0.0769, Test Accuracy 0.97
+```
