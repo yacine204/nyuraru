@@ -1,5 +1,6 @@
-- [ ] refactor `core/types.py` so each class is in a seperate file
-- [ ] use `Cost` class functions instead of hardcoding it
-- [ ] implement `def _backward_propagation()`
-- [ ] implement `def train()`
-- [ ] implement `def create_NN()` 
+- [x] refactor `core/types.py` so each class is in a seperate file
+- [ ] proper functions return, -> ...
+- [x] use `Cost` class functions instead of hardcoding it
+- [x] implement `def _backward_propagation()`
+- [x] implement `def train()`
+- [ ] visualizing

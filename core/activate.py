@@ -1,6 +1,11 @@
-from layer import Layer
-import numpy as mp
+from __future__ import annotations
+
+import numpy as np
 import array
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from .layer import Layer
 
 class Activate:
     def ReLU(layer: Layer) -> array[float]:

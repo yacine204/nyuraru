@@ -2,28 +2,38 @@ import numpy as np
 import array
 import math
 
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from .activate import Activate
+
+
 class Layer:
-    def __init__(self, n_nodes: array[float], nodes: array[float], weight: array[float], bias: array[float]):
+    def __init__(
+        self,
+        n_nodes: int,
+        activation: str | None = None,
+        nodes: np.ndarray | None = None,
+        weight: np.ndarray | None = None,
+        bias: np.ndarray | None = None,
+    ):
         self.n_nodes = n_nodes
+        self.activation = activation
         self.nodes = nodes
         self.weight = weight
-        if bias is not None:
-            self.bias = bias
-        pass
-  
+        self.bias = bias
+
     def forward_layer(self):
-        if self.bias is not None:
-            self.n_nodes * self.weight + self.bias
-        else: 
+        if self.nodes is None or self.weight is None:
             return None
-        
+        if self.bias is not None:
+            return np.dot(self.nodes, self.weight) + self.bias
+        return np.dot(self.nodes, self.weight)
+
     def activate(self, activation_type):
-        match activation_type:
-            case 'ReLU':
-                return np.max(0, self.forward_layer())
-            case 'Sigmoid':
-                return 1/(1+math.exp(-self.forward_layer()))
-            case 'Softmax':
-                x = self.forward_layer() - np.max(self.forward_layer())
-                exp_x = np.exp(self.forward_layer())
-                return exp_x / np.sum(exp_x)
+        from .activate import Activate
+
+        activation_function = getattr(Activate, activation_type, None)
+        if activation_function and callable(activation_function):
+            return activation_function(self)
+        raise ValueError(f"activation function {activation_type} is not found")
