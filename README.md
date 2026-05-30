@@ -15,6 +15,11 @@ Deep-learning library for visualing neural networks training results and tests d
 - real-time tests
 - performance benchmarks between different parameters
 
+## Test results
+Based on running nyuraru_test.py and pytorch_test.py:
+- Nyuraru: Wall Time 7.39s, Test Cost 0.0769, Test Accuracy 0.977
+- PyTorch: Wall Time 7.47s, Test Cost 0.2961, Test Accuracy 0.915
+
 ## How it works:
 
 ```py

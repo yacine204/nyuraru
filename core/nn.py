@@ -1,4 +1,5 @@
 from .layer import Layer
+from .activate import Activate
 import numpy as np
 import os
 from .cost import Cost
@@ -76,13 +77,11 @@ class NN:
 
     def _activation(self, x: np.ndarray, kind: str) -> np.ndarray:
         if kind == "relu":
-            return np.maximum(0, x)
+            return Activate.ReLU(x)
         if kind == "sigmoid":
-            return 1 / (1 + np.exp(-x))
+            return Activate.Sigmoid(x)
         if kind == "softmax":
-            shifted = x - np.max(x, axis=1, keepdims=True)
-            exp_x = np.exp(shifted)
-            return exp_x / np.sum(exp_x, axis=1, keepdims=True)
+            return Activate.Softmax(x)
         return x
 
     def _activation_derivative(self, a: np.ndarray, kind: str, z: np.ndarray | None = None) -> np.ndarray:

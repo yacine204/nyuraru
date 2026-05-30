@@ -4,3 +4,4 @@
 - [x] implement `def _backward_propagation()`
 - [x] implement `def train()`
 - [ ] visualizing
+- [ ] minimize syntax and calls 
