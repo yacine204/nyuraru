@@ -113,9 +113,16 @@ static float NodeRadius(float spacing_y) {
 static Color ProbColor(float p) {
     if (p < 0) p = 0;
     if (p > 1) p = 1;
-    unsigned char g = (unsigned char)(40 + p * 215);
-    unsigned char rb = (unsigned char)(40 * (1.0f - p));
-    return (Color){ rb, g, rb, 255 };
+
+    if (p < 0.01f) {
+        return (Color){20, 30, 20, 255}; 
+    }
+
+
+    unsigned char g = (unsigned char)(30 +p * 255);
+    unsigned char r = (unsigned char)(30* (1.0f - p + 0.8f));
+    unsigned char b = (unsigned char)(30 * (1.0f - p * 0.8f));
+    return (Color){r, g, b, 255 };
 }
 
 
@@ -170,9 +177,11 @@ void DrawNN(NN *nn, int screen_width, int screen_height) {
             prev_layer_y[i] = spacing_y * (float)(i + 1);
             Color c = (nn->input_layer->nodes[i] > 0.0f) ? RED : GREEN;
             DrawCircle((int)start_x, (int)prev_layer_y[i], radius, c);
+            //DrawCircleLines((int)prev_layer_x, (int)prev_layer_y[i], radius, BLACK);
         }
         prev_layer_count = nn->input_layer->n_nodes;
         prev_layer_x = start_x;
+        prev_is_image = 0;
     }
 
     // hidden layers
@@ -188,7 +197,8 @@ void DrawNN(NN *nn, int screen_width, int screen_height) {
             for (int prev_j = 0; prev_j < prev_layer_count; prev_j++) {
                 for (int curr_j = 0; curr_j < nn->hidden_layer[i]->n_nodes; curr_j++) {
                     float current_y = spacing_y * (float)(curr_j + 1);
-                    Color lc = (Color){70, 70, 80, prev_is_image ? 180 : 60};
+                    Color lc = nn->hidden_layer[i]->nodes[curr_j] > 0 ? GREEN : GRAY;
+                    // Color lc = (Color){70, 70, 80, prev_is_image ? 180 : 60};
                     DrawLine((int)prev_layer_x, (int)prev_layer_y[prev_j], (int)current_x, (int)current_y, lc);
                 }
             }
@@ -214,7 +224,8 @@ void DrawNN(NN *nn, int screen_width, int screen_height) {
     for (int prev_j = 0; prev_j < prev_layer_count; prev_j++) {
         for (int curr_j = 0; curr_j < nn->outputLayer->n_nodes; curr_j++) {
             float current_y = spacing_y * (float)(curr_j + 1);
-            DrawLine((int)prev_layer_x, (int)prev_layer_y[prev_j], (int)current_x, (int)current_y, LIGHTGRAY);
+            DrawLine((int)prev_layer_x, (int)prev_layer_y[prev_j], (int)current_x, (int)current_y, 
+                                                                    nn->outputLayer->nodes[curr_j]>0?GREEN:LIGHTGRAY);
         }
     }
 

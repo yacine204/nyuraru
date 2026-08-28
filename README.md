@@ -29,6 +29,7 @@ input_layer = Layer(28 * 28)
 hidden_layer = [
 	Layer(128, activation="relu"),
 	Layer(64, activation="relu"),
+	Layer(64, activation="relu"),
 ]
 output_layer = Layer(10, activation="softmax")
 neural_network = NN(input_layer, hidden_layer, output_layer, "CCE")

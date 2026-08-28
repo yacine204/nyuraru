@@ -6,11 +6,8 @@ import numpy as np
 import os
 from .cost import Cost
 
-MODEL_FILE_PATH = "weights/model.npz"
-
-
 class NN:
-    def __init__(self, input_layer: Layer, hidden_layer: list[Layer], output_layer: Layer, cost_function: str):
+    def __init__(self, input_layer: Layer, hidden_layer: list[Layer], output_layer: Layer, cost_function: str, model_file_path: str):
         self.input_layer = input_layer
         self.hidden_layer = hidden_layer
         self.output_layer = output_layer
@@ -18,11 +15,12 @@ class NN:
         self.cost_function = cost_function.upper()
         self.huber_delta = 1.0
         self.cost = Cost(self.cost_function, threshold=self.huber_delta)
+        self.model_file_path = model_file_path
 
         self.layer_sizes = [self._layer_size(layer) for layer in self.layers]
         self.activations = self._build_activations()
 
-        model = self._load_model()
+        model = self._load_model(self.model_file_path)
         if model is not None:
             self.weights, self.biases = model
         else:
@@ -161,7 +159,11 @@ class NN:
         y_pred_labels = np.argmax(y_pred, axis=1)
         return float(np.mean(y_true_labels == y_pred_labels))
 
-    def _save_model(self, file_path: str = MODEL_FILE_PATH) -> None:
+    def _save_model(self, file_path: str = None) -> None:
+        if file_path is None:
+            print(f"file_path not provided, overiding {file_path}")
+            file_path = self.model_file_path
+
         os.makedirs(os.path.dirname(file_path), exist_ok=True)
         np.savez(
             file_path,
@@ -171,10 +173,11 @@ class NN:
             activations=np.array(self.activations),
             cost_function=self.cost_function,
         )
-        print("Model saved")
+        print(f"Model saved to {file_path}")
 
-    def _load_model(self, file_path: str = MODEL_FILE_PATH) -> tuple[list[np.ndarray], list[np.ndarray]] | None:
+    def _load_model(self, file_path: str) -> tuple[list[np.ndarray], list[np.ndarray]] | None:
         if not os.path.exists(file_path):
+            print(f"{file_path} doesn't seem like a legit path")
             return None
 
         data = np.load(file_path, allow_pickle=True)
@@ -182,6 +185,7 @@ class NN:
             weights = data["weights"].tolist()
             biases = data["biases"].tolist()
             if len(weights) == len(self.layer_sizes) - 1:
+                print(f"{file_path} loaded")
                 return weights, biases
         return None
 
@@ -202,7 +206,12 @@ class NN:
         batch_size: int = 128,
         shuffle: bool = True,
         visualize: bool = False,
+        file_path: str = None,
     ) -> None:
+
+        if file_path is None:
+            return ValueError("include file_path to specify where to save model")
+
         x_data = np.asarray(training_batch)
         y_data = np.asarray(y_batch)
         n_samples = x_data.shape[0]
@@ -254,7 +263,7 @@ class NN:
         if viz:
             viz.close()
 
-        self._save_model()
+        self._save_model(file_path)
         print("Training complete")
 
     def predict_loop(self, viz=None, grid_w: int = 28, grid_h: int = 28, auto_predict: bool = True) -> None:
