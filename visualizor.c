@@ -262,7 +262,7 @@ void DrawNN(NN *nn, int screen_width, int screen_height) {
         
     }
     rlEnd();
-    
+
     for (int i = 0; i < nn->outputLayer->n_nodes; i++) {
         float current_y = spacing_y * (float)(i + 1);
         float p = nn->outputLayer->nodes[i];
@@ -369,7 +369,7 @@ void ui_init(int screen_width, int screen_height,
 
     InitWindow(screen_width, screen_height, "nyuraru");
     SetExitKey(KEY_NULL);
-    SetTargetFPS(60);
+    SetTargetFPS(120);
 
     g_board_start_x = 100.0f + (0.6f * (float)screen_width) + 40.0f;
     g_board_width = (float)screen_width - g_board_start_x - 50.0f;
@@ -434,6 +434,7 @@ void ui_reset_display(void) {
 }
 
 int ui_predict_pressed(void) {
+    if(IsKeyPressed(KEY_ESCAPE)) ui_close();
     return IsKeyPressed(KEY_ENTER);
 }
 
