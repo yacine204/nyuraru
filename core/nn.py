@@ -7,7 +7,7 @@ import os
 from .cost import Cost
 
 class NN:
-    def __init__(self, input_layer: Layer, hidden_layer: list[Layer], output_layer: Layer, cost_function: str, model_file_path: str):
+    def __init__(self, input_layer: Layer, hidden_layer: list[Layer], output_layer: Layer, cost_function: str, model_file_path: str=None):
         self.input_layer = input_layer
         self.hidden_layer = hidden_layer
         self.output_layer = output_layer
@@ -20,11 +20,12 @@ class NN:
         self.layer_sizes = [self._layer_size(layer) for layer in self.layers]
         self.activations = self._build_activations()
 
-        model = self._load_model(self.model_file_path)
-        if model is not None:
-            self.weights, self.biases = model
-        else:
-            self.weights, self.biases = self._init_params()
+        self.weights, self.biases = self._init_params()
+
+        if self.model_file_path is not None:
+            model = self._load_model(self.model_file_path)
+            if model is not None:
+                self.weights, self.biases = model
 
         self._sync_layer_params()
         self.cache_a = []
