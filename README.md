@@ -19,7 +19,6 @@ https://github.com/user-attachments/assets/31a8b909-1600-42d3-8cbc-013e7146c63b
 
 ## How it works:
 
-
 ### Initialize Layers and Neural Network:
 
 ```py
@@ -72,6 +71,13 @@ print(f"Test Cost: {test_loss:.4f}, Test Accuracy: {test_accuracy:.3f}")
 ```py
 neural_network.predict_loop()
 ```
+
+## Requirements: 
+
+ - gcc 
+ - python 3.12+
+ - raylib	
+
 
 ## Installation: 
 

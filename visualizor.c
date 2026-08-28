@@ -3,9 +3,12 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+#include <rlgl.h>
+// #define SCREEN_WIDTH 1920
+// #define SCREEN_HEIGHT 1080
 
-#define SCREEN_WIDTH 1920
-#define SCREEN_HEIGHT 1080
+#define SCREEN_WIDTH 1280
+#define SCREEN_HEIGHT 720
 
 typedef struct {
     int n_nodes;
@@ -125,7 +128,6 @@ static Color ProbColor(float p) {
     return (Color){r, g, b, 255 };
 }
 
-
 void DrawNN(NN *nn, int screen_width, int screen_height) {
     float start_x = 100.0f;
     float screen_allowed = 0.6f * (float)screen_width;
@@ -139,6 +141,7 @@ void DrawNN(NN *nn, int screen_width, int screen_height) {
     if (nn->outputLayer->n_nodes > max_nodes) max_nodes = nn->outputLayer->n_nodes;
 
     float *prev_layer_y = malloc(max_nodes * sizeof(float));
+    float *prev_layer_activation = malloc(max_nodes * sizeof(float)); 
     int prev_layer_count = 0;
     float prev_layer_x = 0;
     int prev_is_image = 0;
@@ -147,17 +150,18 @@ void DrawNN(NN *nn, int screen_width, int screen_height) {
 
     // input layer
     if (g_input_grid_w > 0 && g_input_grid_h > 0) {
-        
         float img_size = 220.0f;
         float img_x = start_x - img_size / 2.0f + 15.0f;
         float img_y = (screen_height - img_size) / 2.0f;
         float cell = img_size / (float)g_input_grid_w;
-
+        int has_signal = 0;
+ // NEW: real array, not scoped garbage
         for (int gy = 0; gy < g_input_grid_h; gy++) {
             for (int gx = 0; gx < g_input_grid_w; gx++) {
                 int idx = gy * g_input_grid_w + gx;
                 float v = nn->input_layer->nodes[idx];
                 if (v < 0) v = 0; if (v > 1) v = 1;
+                if (v > 0.0f) has_signal = 1;
                 unsigned char c = (unsigned char)(v * 255);
                 DrawRectangle((int)(img_x + gx * cell), (int)(img_y + gy * cell),
                                (int)ceilf(cell), (int)ceilf(cell), (Color){c, c, c, 255});
@@ -165,8 +169,8 @@ void DrawNN(NN *nn, int screen_width, int screen_height) {
         }
         DrawRectangleLines((int)img_x, (int)img_y, (int)img_size, (int)img_size, LIGHTGRAY);
 
-       
         prev_layer_y[0] = screen_height / 2.0f;
+        prev_layer_activation[0] = has_signal ? 1.0f : 0.0f;  
         prev_layer_count = 1;
         prev_layer_x = img_x + img_size;
         prev_is_image = 1;
@@ -175,9 +179,10 @@ void DrawNN(NN *nn, int screen_width, int screen_height) {
         float radius = NodeRadius(spacing_y);
         for (int i = 0; i < nn->input_layer->n_nodes; i++) {
             prev_layer_y[i] = spacing_y * (float)(i + 1);
+            prev_layer_activation[i] = nn->input_layer->nodes[i];  
             Color c = (nn->input_layer->nodes[i] > 0.0f) ? RED : GREEN;
             DrawCircle((int)start_x, (int)prev_layer_y[i], radius, c);
-            //DrawCircleLines((int)prev_layer_x, (int)prev_layer_y[i], radius, BLACK);
+            DrawCircleLines((int)start_x, (int)prev_layer_y[i], radius, BLACK);
         }
         prev_layer_count = nn->input_layer->n_nodes;
         prev_layer_x = start_x;
@@ -191,17 +196,31 @@ void DrawNN(NN *nn, int screen_width, int screen_height) {
         float radius = NodeRadius(spacing_y);
 
         long line_count = (long)prev_layer_count * nn->hidden_layer[i]->n_nodes;
-        int draw_lines = prev_is_image || line_count <= 20000; // skip if it'd be a mess
+        int draw_lines = prev_is_image || line_count > 0;
 
         if (draw_lines) {
+            rlBegin(RL_LINES);
             for (int prev_j = 0; prev_j < prev_layer_count; prev_j++) {
+                float prev_node_activation = prev_layer_activation[prev_j]; 
+                if (prev_node_activation == 0.0f) continue;
+
                 for (int curr_j = 0; curr_j < nn->hidden_layer[i]->n_nodes; curr_j++) {
+                    float activation = nn->hidden_layer[i]->nodes[curr_j];
                     float current_y = spacing_y * (float)(curr_j + 1);
-                    Color lc = nn->hidden_layer[i]->nodes[curr_j] > 0 ? GREEN : GRAY;
-                    // Color lc = (Color){70, 70, 80, prev_is_image ? 180 : 60};
-                    DrawLine((int)prev_layer_x, (int)prev_layer_y[prev_j], (int)current_x, (int)current_y, lc);
+
+                    float abs_act = fabsf(activation);
+                    float factor = abs_act > 1.0f ? 1.0f : abs_act;
+                    unsigned char alpha = (unsigned char)(50 + (factor * 205));
+                    Color lc = (activation > 0.0f)
+                        ? (Color){0, 255, 0, alpha}
+                        : (Color){90, 90, 90, 25};
+
+                    rlColor4ub(lc.r, lc.g, lc.b, lc.a);
+                    rlVertex2f(prev_layer_x, prev_layer_y[prev_j]);
+                    rlVertex2f(current_x, current_y);
                 }
             }
+            rlEnd();
         }
 
         for (int j = 0; j < nn->hidden_layer[i]->n_nodes; j++) {
@@ -210,6 +229,7 @@ void DrawNN(NN *nn, int screen_width, int screen_height) {
             DrawCircle((int)current_x, (int)current_y, radius, circle_color);
             if (radius > 4.0f) DrawCircleLines((int)current_x, (int)current_y, radius, BLACK);
             prev_layer_y[j] = current_y;
+            prev_layer_activation[j] = nn->hidden_layer[i]->nodes[j]; 
         }
         prev_layer_count = nn->hidden_layer[i]->n_nodes;
         prev_layer_x = current_x;
@@ -221,17 +241,31 @@ void DrawNN(NN *nn, int screen_width, int screen_height) {
     float spacing_y = (float)screen_height / (float)(nn->outputLayer->n_nodes + 1);
     float radius = NodeRadius(spacing_y);
 
+    rlBegin(RL_LINES);
     for (int prev_j = 0; prev_j < prev_layer_count; prev_j++) {
+
         for (int curr_j = 0; curr_j < nn->outputLayer->n_nodes; curr_j++) {
             float current_y = spacing_y * (float)(curr_j + 1);
-            DrawLine((int)prev_layer_x, (int)prev_layer_y[prev_j], (int)current_x, (int)current_y, 
-                                                                    nn->outputLayer->nodes[curr_j]>0?GREEN:LIGHTGRAY);
+            float activation = nn->outputLayer->nodes[curr_j];
+            float abs_act = fabsf(activation);
+            float factor = abs_act > 1.0f ? 1.0f : abs_act;
+            unsigned char alpha = (unsigned char)(50 + (factor * 205));
+            Color lc = (activation > 0.0f)
+                        ? (Color){0, 255, 0, alpha}
+                        : (Color){90, 90, 90, 25};
+            // DrawLine((int)prev_layer_x, (int)prev_layer_y[prev_j], (int)current_x, (int)current_y,
+            //                                                         nn->outputLayer->nodes[curr_j]>0.1?GREEN:LIGHTGRAY);
+            rlColor4ub(lc.r, lc.g, lc.b, lc.a);
+            rlVertex2f(prev_layer_x, prev_layer_y[prev_j]);
+            rlVertex2f(current_x, current_y);
         }
+        
     }
-
+    rlEnd();
+    
     for (int i = 0; i < nn->outputLayer->n_nodes; i++) {
         float current_y = spacing_y * (float)(i + 1);
-        float p = nn->outputLayer->nodes[i];  
+        float p = nn->outputLayer->nodes[i];
         Color out_color = ProbColor(p);
         DrawCircle((int)current_x, (int)current_y, radius, out_color);
         DrawCircleLines((int)current_x, (int)current_y, radius, BLACK);
@@ -239,6 +273,7 @@ void DrawNN(NN *nn, int screen_width, int screen_height) {
     }
 
     free(prev_layer_y);
+    free(prev_layer_activation); 
 }
 
 void DrawBoard(RenderTexture2D canvas, float board_x, float board_y) {
@@ -356,6 +391,7 @@ void ui_frame(void) {
         ClearBackground(DARKGRAY);
         DrawNN(g_nn, g_screen_width, g_screen_height);
         DrawBoard(g_boardCanvas, g_board_start_x, 20.0f);
+        DrawFPS(10, 10);
     EndDrawing();
 }
 
@@ -437,6 +473,7 @@ void ui_frame_with_prediction(int has_prediction, int digit, float confidence) {
         if (has_prediction) {
             ui_draw_prediction_label(digit, confidence);
         }
+        DrawFPS(10, 10);
     EndDrawing();
 }
 

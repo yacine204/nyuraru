@@ -1,7 +1,11 @@
 - [x] refactor `core/types.py` so each class is in a seperate file
-- [ ] proper functions return, -> ...
+- [x] proper functions return, -> ...
 - [x] use `Cost` class functions instead of hardcoding it
 - [x] implement `def _backward_propagation()`
 - [x] implement `def train()`
-- [ ] visualizing
-- [ ] minimize syntax and calls 
+- [x] visualizing
+- [x] minimize syntax and calls 
+- [ ] find a way to give labels that matches the classes enumeration so in the ui it doesnt say "predicted 0"
+- [ ] refactor ui logic, cache lines then update only at a treshhold (reach 60 fps on a big model)
+- [ ] add graph for learning
+- [ ] make ui responsive: in training dont show canvas to draw on and replace it by cost function, in predict_loop replace graph with canvas
