@@ -17,14 +17,18 @@ y_test_onehot[np.arange(10000), y_test] = 1
 
 
 input_layer = Layer(28 * 28)
+
 hidden_layer = [
 	Layer(128, activation="relu"),
 	Layer(64, activation="relu"),
 ]
+
 output_layer = Layer(10, activation="softmax")
 neural_network = NN(input_layer, hidden_layer, output_layer, "CCE")
 
-neural_network.train(10, 0.01, x_train, y_onehot, batch_size=128, shuffle=True)
-
+neural_network.train(10, 0.01, x_train, y_onehot, batch_size=128, shuffle=True, visualize=True)
 test_loss, test_accuracy = neural_network.evaluate(x_test, y_test_onehot)
 print(f"Test Cost: {test_loss:.4f}, Test Accuracy: {test_accuracy:.3f}")
+
+# neural_network.predict_loop()
+

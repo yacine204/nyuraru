@@ -1,3 +1,5 @@
+import time
+
 from .layer import Layer
 from .activate import Activate
 import numpy as np
@@ -199,12 +201,26 @@ class NN:
         y_batch,
         batch_size: int = 128,
         shuffle: bool = True,
+        visualize: bool = False,
     ) -> None:
         x_data = np.asarray(training_batch)
         y_data = np.asarray(y_batch)
         n_samples = x_data.shape[0]
 
+        viz = None
+        if visualize:
+            from .visualizer import Visualizer
+            viz = Visualizer(self.layer_sizes, self.activations[-1])
+            input_size = self.layer_sizes[0]
+            side = int(round(input_size ** 0.5))
+            if side * side == input_size:
+                    viz.set_input_grid(side, side)
+
+        stop_early = False
         for epoch in range(epochs):
+            if stop_early:
+                break
+
             if shuffle:
                 indices = np.random.permutation(n_samples)
                 x_data = x_data[indices]
@@ -213,6 +229,10 @@ class NN:
             batch_losses = []
             batch_accuracies = []
             for start in range(0, n_samples, batch_size):
+                if viz and viz.should_close():
+                    stop_early = True
+                    break
+
                 end = start + batch_size
                 x_batch = x_data[start:end]
                 y_batch_slice = y_data[start:end]
@@ -221,6 +241,9 @@ class NN:
                 loss = self._calculate_loss(y_batch_slice, predictions)
                 self._backward_propagation(y_batch_slice, learning_rate)
                 accuracy = self._compute_accuracy(y_batch_slice, predictions)
+                if viz:
+                    viz.push_activations(self.cache_a)
+                    viz.frame()
 
                 batch_losses.append(loss)
                 batch_accuracies.append(accuracy)
@@ -228,7 +251,78 @@ class NN:
             epoch_loss = float(np.mean(batch_losses))
             epoch_accuracy = float(np.mean(batch_accuracies))
             print(f"Epoch: {epoch + 1}/{epochs}, Cost: {epoch_loss:.4f}, Accuracy: {epoch_accuracy:.3f}")
+        if viz:
+            viz.close()
 
         self._save_model()
         print("Training complete")
 
+    def predict_loop(self, viz=None, grid_w: int = 28, grid_h: int = 28, auto_predict: bool = True) -> None:
+        own_viz = viz is None
+        if own_viz:
+            from .visualizer import Visualizer
+            viz = Visualizer(self.layer_sizes, self.activations[-1])
+            side = int(round(self.layer_sizes[0] ** 0.5))
+            if side * side == self.layer_sizes[0]:
+                viz.set_input_grid(side, side)
+        else:
+            viz.reset_display() 
+        print("[predict_loop] entering loop")   
+        frame_count = 0                          
+        last_probs = None
+        last_probs = None
+        last_prediction_time = 0
+        prediction_cooldown = 0.1
+
+        while not viz.should_close():
+            frame_count += 1
+
+            if viz.clear_pressed():
+                viz.clear_board()
+                last_probs = None
+                if hasattr(viz, 'reset_board_modified'):
+                    viz.reset_board_modified()
+
+            if auto_predict and viz.board_modified():
+                current_time = time.time()
+                if current_time - last_prediction_time > prediction_cooldown:
+                    print("Board modified - predicting...")
+                    pixels = viz.get_board_pixels(grid_w, grid_h)
+                    
+                 
+                    if np.sum(pixels) > 0.5:  
+                        x = pixels.reshape(1, -1)
+                        probs = self._forward_propagation(x)[0]
+                        last_probs = probs
+                        viz.push_activations([x] + self.cache_a[1:])
+                        
+                        digit = int(np.argmax(probs))
+                        confidence = float(probs[digit])
+                        print(f"Auto-predicted: {digit} ({confidence * 100:.1f}%)")
+                        last_prediction_time = current_time
+                        viz.reset_board_modified()
+
+            if viz.predict_pressed():
+                pixels = viz.get_board_pixels(grid_w, grid_h)  
+                x = pixels.reshape(1, -1)
+
+                probs = self._forward_propagation(x)[0]
+                last_probs = probs
+
+                
+                viz.push_activations([x] + self.cache_a[1:])
+
+                digit = int(np.argmax(probs))
+                confidence = float(probs[digit])
+                print(f"Predicted: {digit} ({confidence * 100:.1f}%)")
+
+            pred = None
+            if last_probs is not None:
+                digit = int(np.argmax(last_probs))
+                confidence = float(last_probs[digit])
+                pred = (digit, confidence)
+
+            viz.frame(prediction=pred)
+        print(f"[predict_loop] exited after {frame_count} frames")
+        if own_viz:
+            viz.close()
