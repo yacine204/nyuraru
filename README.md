@@ -2,6 +2,12 @@
 
 Deep-learning library for visualing neural networks training results and tests depending on cost/loss functions chosen
 
+---
+
+https://github.com/user-attachments/assets/31a8b909-1600-42d3-8cbc-013e7146c63b
+
+---
+
 ## What it does
 
 - create your custom neural network
@@ -29,6 +35,10 @@ neural_network = NN(input_layer, hidden_layer, output_layer, "CCE")
 ```
 
 ### Training:
+
+
+https://github.com/user-attachments/assets/b6b57caf-ce26-47cf-8e30-7d53dc119255
+
 
 if you dont have a model yet u can train ur model using .npy dataset (make sure to split to x,y train), else it will be loaded by itself.
 
