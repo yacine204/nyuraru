@@ -4,7 +4,7 @@ Deep-learning library for visualing neural networks training results and tests d
 
 ---
 
-https://github.com/user-attachments/assets/31a8b909-1600-42d3-8cbc-013e7146c63b
+https://github.com/user-attachments/assets/ab7a51c3-919d-491a-8ca9-db08405a5a56
 
 ---
 
@@ -35,10 +35,11 @@ neural_network = NN(input_layer, hidden_layer, output_layer, "CCE")
 ```
 
 ### Training:
+---
 
+https://github.com/user-attachments/assets/41b1dd95-9ee8-4a62-8772-b0daf8bc0029
 
-https://github.com/user-attachments/assets/b6b57caf-ce26-47cf-8e30-7d53dc119255
-
+---
 
 if you dont have a model yet u can train ur model using .npy dataset (make sure to split to x,y train), else it will be loaded by itself.
 
