@@ -43,6 +43,8 @@ https://github.com/user-attachments/assets/41b1dd95-9ee8-4a62-8772-b0daf8bc0029
 
 if you dont have a model yet u can train ur model using .npy dataset (make sure to split to x,y train), else it will be loaded by itself.
 
+repo provides trained models that u can test with `predict_loop()` or `evaluate()`, located in `weights/`.
+
 ```py
 x_train = np.load('./dataset/x_train.npy')
 y_train = np.load('./dataset/y_train.npy')
@@ -68,7 +70,7 @@ print(f"Test Cost: {test_loss:.4f}, Test Accuracy: {test_accuracy:.3f}")
 ```
 
 ### Prediction Loop:
-
+playground to test your model in real time.
 ```py
 neural_network.predict_loop()
 ```
