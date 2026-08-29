@@ -9,3 +9,5 @@
 - [ ] refactor ui logic, cache lines then update only at a treshhold (reach 60 fps on a big model)
 - [ ] add graph for learning
 - [ ] make ui responsive: in training dont show canvas to draw on and replace it by cost function, in predict_loop replace graph with canvas
+- [ ] fix node logic, red nodes giving activated lines
+- [ ] display number of activated nodes per layer

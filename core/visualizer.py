@@ -58,8 +58,12 @@ class Visualizer:
         self.lib.ui_frame_with_prediction.argtypes = [ctypes.c_int, ctypes.c_int, ctypes.c_float]
         self.lib.ui_board_modified.restype = ctypes.c_int
         self.lib.ui_reset_board_modified.argtypes = []
+        self.lib.ui_escape_pressed.restype = ctypes.c_int
+        self.lib.ui_escape_pressed.argtypes = []
 
     def should_close(self) -> bool:
+        if self.lib.ui_escape_pressed():
+            return True
         return bool(self.lib.ui_should_close())
 
     def set_input_grid(self, grid_w: int, grid_h: int):

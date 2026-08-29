@@ -381,11 +381,10 @@ void ui_init(int screen_width, int screen_height,
 }
 
 int ui_should_close(void) {
-    int result = WindowShouldClose();
-    // printf("ui_should_close() called -> %d\n", result);
-    fflush(stdout);
-    return result;
+    if(!IsWindowReady()) return 1;
+    return WindowShouldClose();
 }
+
 void ui_frame(void) {
     BeginDrawing();
         ClearBackground(DARKGRAY);
@@ -412,10 +411,18 @@ void ui_set_layer_nodes(int layer_idx, float *values, int n) {
 }
 
 void ui_close(void) {
-    UnloadRenderTexture(g_boardCanvas);
-    CloseWindow();
-    FreeNN(g_nn);
-    g_nn = NULL;
+    if(IsWindowReady){
+        if(g_boardCanvas.id!=0){
+            UnloadRenderTexture(g_boardCanvas);
+            g_boardCanvas.id=0;
+        }
+        CloseWindow();
+    }
+
+    if(g_nn){
+        FreeNN(g_nn);
+        g_nn = NULL;
+    }
 }
 
 
@@ -434,8 +441,11 @@ void ui_reset_display(void) {
 }
 
 int ui_predict_pressed(void) {
-    if(IsKeyPressed(KEY_ESCAPE)) ui_close();
     return IsKeyPressed(KEY_ENTER);
+}
+
+int ui_escape_pressed(void){
+    return IsKeyPressed(KEY_ESCAPE);
 }
 
 int ui_clear_pressed(void) {
