@@ -106,6 +106,7 @@ void InitNN(NN *nn, char* i_activation, int i_n_nodes,
     InitHiddenLayer(nn, h_activation, n_n_nodes, n_hidden_layers);
     InitOutLayer(nn, o_activation, o_n_nodes);
 }
+
 static float NodeRadius(float spacing_y) {
     float r = spacing_y * 0.4f;
     if (r > 15.0f) r = 15.0f;
@@ -117,15 +118,9 @@ static Color ProbColor(float p) {
     if (p < 0) p = 0;
     if (p > 1) p = 1;
 
-    if (p < 0.01f) {
-        return (Color){20, 30, 20, 255}; 
-    }
-
-
-    unsigned char g = (unsigned char)(30 +p * 255);
-    unsigned char r = (unsigned char)(30* (1.0f - p + 0.8f));
-    unsigned char b = (unsigned char)(30 * (1.0f - p * 0.8f));
-    return (Color){r, g, b, 255 };
+    unsigned char r = (unsigned char)(255 * (1.0f - p));
+    unsigned char g = (unsigned char)(255 * p);
+    return (Color){r, g, 30, 255};
 }
 
 void DrawNN(NN *nn, int screen_width, int screen_height) {
@@ -180,7 +175,7 @@ void DrawNN(NN *nn, int screen_width, int screen_height) {
         for (int i = 0; i < nn->input_layer->n_nodes; i++) {
             prev_layer_y[i] = spacing_y * (float)(i + 1);
             prev_layer_activation[i] = nn->input_layer->nodes[i];  
-            Color c = (nn->input_layer->nodes[i] > 0.0f) ? RED : GREEN;
+            Color c = (nn->input_layer->nodes[i] > 0.0f) ? GREEN : RED;
             DrawCircle((int)start_x, (int)prev_layer_y[i], radius, c);
             DrawCircleLines((int)start_x, (int)prev_layer_y[i], radius, BLACK);
         }
@@ -225,7 +220,7 @@ void DrawNN(NN *nn, int screen_width, int screen_height) {
 
         for (int j = 0; j < nn->hidden_layer[i]->n_nodes; j++) {
             float current_y = spacing_y * (float)(j + 1);
-            Color circle_color = (nn->hidden_layer[i]->nodes[j] > 0.0f) ? RED : GREEN;
+            Color circle_color = (nn->hidden_layer[i]->nodes[j] > 0.0f) ? GREEN : RED;
             DrawCircle((int)current_x, (int)current_y, radius, circle_color);
             if (radius > 4.0f) DrawCircleLines((int)current_x, (int)current_y, radius, BLACK);
             prev_layer_y[j] = current_y;
@@ -243,7 +238,8 @@ void DrawNN(NN *nn, int screen_width, int screen_height) {
 
     rlBegin(RL_LINES);
     for (int prev_j = 0; prev_j < prev_layer_count; prev_j++) {
-
+        float prev_node_activation = prev_layer_activation[prev_j];
+        if (prev_node_activation == 0.0f) continue;
         for (int curr_j = 0; curr_j < nn->outputLayer->n_nodes; curr_j++) {
             float current_y = spacing_y * (float)(curr_j + 1);
             float activation = nn->outputLayer->nodes[curr_j];
@@ -275,6 +271,7 @@ void DrawNN(NN *nn, int screen_width, int screen_height) {
     free(prev_layer_y);
     free(prev_layer_activation); 
 }
+
 
 void DrawBoard(RenderTexture2D canvas, float board_x, float board_y) {
     static Vector2 lastMousePos = { 0 };

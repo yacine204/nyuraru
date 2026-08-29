@@ -19,8 +19,8 @@ y_test_onehot[np.arange(10000), y_test] = 1
 input_layer = Layer(28 * 28)
 
 hidden_layer = [
-	Layer(30, activation="relu"),
-    Layer(50, activation="relu"),
+	Layer(10, activation="relu"),
+    Layer(10, activation="relu"),
 
 ]
 
