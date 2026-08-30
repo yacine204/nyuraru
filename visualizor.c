@@ -210,6 +210,7 @@ void DrawNN(NN *nn, int screen_width, int screen_height) {
                         ? (Color){0, 255, 0, alpha}
                         : (Color){90, 90, 90, 25};
 
+                    //Color nc = ProbColor(nn->hidden_layer[i]->nodes[curr_j]);
                     rlColor4ub(lc.r, lc.g, lc.b, lc.a);
                     rlVertex2f(prev_layer_x, prev_layer_y[prev_j]);
                     rlVertex2f(current_x, current_y);
@@ -220,7 +221,8 @@ void DrawNN(NN *nn, int screen_width, int screen_height) {
 
         for (int j = 0; j < nn->hidden_layer[i]->n_nodes; j++) {
             float current_y = spacing_y * (float)(j + 1);
-            Color circle_color = (nn->hidden_layer[i]->nodes[j] > 0.0f) ? GREEN : RED;
+            Color circle_color = ProbColor(nn->hidden_layer[i]->nodes[j]);
+            
             DrawCircle((int)current_x, (int)current_y, radius, circle_color);
             if (radius > 4.0f) DrawCircleLines((int)current_x, (int)current_y, radius, BLACK);
             prev_layer_y[j] = current_y;
@@ -244,8 +246,7 @@ void DrawNN(NN *nn, int screen_width, int screen_height) {
             float current_y = spacing_y * (float)(curr_j + 1);
             float activation = nn->outputLayer->nodes[curr_j];
             float abs_act = fabsf(activation);
-            float factor = abs_act > 1.0f ? 1.0f : abs_act;
-            unsigned char alpha = (unsigned char)(50 + (factor * 205));
+            unsigned char alpha = (unsigned char)(abs_act*255.0f);
             Color lc = (activation > 0.0f)
                         ? (Color){0, 255, 0, alpha}
                         : (Color){90, 90, 90, 25};
