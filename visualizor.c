@@ -474,6 +474,12 @@ void ui_draw_prediction_label(int digit, float confidence) {
     DrawText(txt, (int)g_board_start_x + 10, (int)(g_screen_height - 60), 24, RAYWHITE);
 }
 
+void ui_draw_prediction_label(char *class, float confidence) {
+    const char *txt = TextFormat("Prediction: %d (%.1f%%)", class, confidence * 100.0f);
+    DrawText(txt, (int)g_board_start_x + 10, (int)(g_screen_height - 60), 24, RAYWHITE);
+}
+
+
 void ui_frame_with_prediction(int has_prediction, int digit, float confidence) {
     BeginDrawing();
         ClearBackground(DARKGRAY);

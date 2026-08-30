@@ -6,6 +6,10 @@ Deep-learning library for visualing neural networks training results and tests d
 
 https://github.com/user-attachments/assets/ab7a51c3-919d-491a-8ca9-db08405a5a56
 
+this is a test from `cat_dog.py`, `{1:dog, 0:cat}`
+
+![demo](demo.png)
+
 ---
 
 ## What it does
