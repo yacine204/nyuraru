@@ -23,6 +23,7 @@ https://github.com/user-attachments/assets/ab7a51c3-919d-491a-8ca9-db08405a5a56
 
 ```py
 from core.nn import NN
+from core.layer import Layer
 
 input_layer = Layer(28 * 28)
 hidden_layer = [
