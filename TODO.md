@@ -12,3 +12,4 @@
 - [x] fix node logic, red nodes giving activated lines
 - [ ] display number of activated nodes per layer
 - [ ] button to switch between input nodes and image input
+- [ ] neural display only show lines when drawing on the top of the canvas
